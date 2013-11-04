@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
+	<false/>
+	<key>IDESourceControlProjectIdentifier</key>
+	<string>2EDD3667-0035-4E7A-98EB-91ED23687633</string>
+	<key>IDESourceControlProjectName</key>
+	<string>mapamok</string>
+	<key>IDESourceControlProjectOriginsDictionary</key>
+	<dict>
+		<key>44FD513C-13F5-4B99-8200-D3C45BF69943</key>
+		<string>https://github.com/YCAMInterlab/ProCamToolkit.git</string>
+	</dict>
+	<key>IDESourceControlProjectPath</key>
+	<string>mapamok/mapamok.xcodeproj/project.xcworkspace</string>
+	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
+	<dict>
+		<key>44FD513C-13F5-4B99-8200-D3C45BF69943</key>
+		<string>../../..</string>
+	</dict>
+	<key>IDESourceControlProjectURL</key>
+	<string>https://github.com/YCAMInterlab/ProCamToolkit.git</string>
+	<key>IDESourceControlProjectVersion</key>
+	<integer>110</integer>
+	<key>IDESourceControlProjectWCCIdentifier</key>
+	<string>44FD513C-13F5-4B99-8200-D3C45BF69943</string>
+	<key>IDESourceControlProjectWCConfigurations</key>
+	<array>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>44FD513C-13F5-4B99-8200-D3C45BF69943</string>
+			<key>IDESourceControlWCCName</key>
+			<string>ProCamToolkit</string>
+		</dict>
+	</array>
+</dict>
+</plist>

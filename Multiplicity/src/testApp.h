@@ -5,7 +5,10 @@
 #include "ofxAssimpModelLoader.h"
 #include "ofxProCamToolkit.h"
 #include "ofxAutoControlPanel.h"
+#include "ofxKinect.h"
 #include "LineArt.h"
+#include "shadowMapLight.h"
+
 
 class testApp : public ofBaseApp {
 public:
@@ -18,7 +21,8 @@ public:
 	
 	void setup();
 	void update();
-	void draw();	
+	void draw();
+	void exit();
 	void keyPressed(int key);
 	void mousePressed(int x, int y, int button);
 	void mouseReleased(int x, int y, int button);
@@ -32,7 +36,22 @@ public:
 	void render();
     void loadCalibration();
 	void saveCalibration();
+    void setupLights();
+
+    void drawPointCloud();
 	
+	ofxKinect kinect;
+	
+	bool bThreshWithOpenCV;
+	bool bDrawPointCloud;
+	
+	int nearThreshold;
+	int farThreshold;
+	
+	int angle;
+    
+    float lightAngle;
+
 	ofxAssimpModelLoader model;	
 	ofEasyCam cam;
 	ofVboMesh objectMesh;
@@ -40,6 +59,10 @@ public:
 	ofLight light;
 	ofxAutoControlPanel panel;
 	
+    ShadowMapLight m_shadowLight;
+    ofShader m_shader;
+
+    
 	vector<cv::Point3f> objectPoints;
 	vector<cv::Point2f> imagePoints;
 	vector<bool> referencePoints;

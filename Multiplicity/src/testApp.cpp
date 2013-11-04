@@ -23,15 +23,51 @@ float testApp::getf(string name) {
 }
 
 void testApp::setup() {
+    
+    lightAngle = 0.0;
+    
+	// enable depth->video image calibration
+	kinect.setRegistration(true);
+    
+	kinect.init();
+	//kinect.init(true); // shows infrared instead of RGB video image
+	//kinect.init(false, false); // disable video image (faster fps)
+	
+	kinect.open();		// opens first available kinect
+
+    // print the intrinsic IR sensor values
+	if(kinect.isConnected()) {
+		ofLogNotice() << "sensor-emitter dist: " << kinect.getSensorEmitterDistance() << "cm";
+		ofLogNotice() << "sensor-camera dist:  " << kinect.getSensorCameraDistance() << "cm";
+		ofLogNotice() << "zero plane pixel size: " << kinect.getZeroPlanePixelSize() << "mm";
+		ofLogNotice() << "zero plane dist: " << kinect.getZeroPlaneDistance() << "mm";
+	}
+    
 	ofSetDrawBitmapMode(OF_BITMAPMODE_MODEL_BILLBOARD);
 	ofSetVerticalSync(true);
 	calibrationReady = false;
 	setupMesh();	
 	setupControlPanel();
+    m_shader.load( "shaders/mainScene.vert", "shaders/mainScene.frag" );
+    setupLights();
+
 }
 
 void testApp::update() {
-	ofSetWindowTitle("mapamok");
+	ofSetWindowTitle("Multiplicity");
+    
+    kinect.update();
+    
+    // there is a new frame and we are connected
+	if(kinect.isFrameNew()) {
+		
+//      grayImage.setFromPixels(kinect.getDepthPixels(), kinect.width, kinect.height);
+
+		// update the cv images
+//		grayImage.flagImageChanged();
+
+	}
+    
 	if(getb("randomLighting")) {
 		setf("lightX", ofSignedNoise(ofGetElapsedTimef(), 1, 1) * 1000);
 		setf("lightY", ofSignedNoise(1, ofGetElapsedTimef(), 1) * 1000);
@@ -45,6 +81,25 @@ void testApp::update() {
 		updateRenderMode();
 		cam.disableMouseInput();
 	}
+}
+
+void testApp::setupLights() {
+    // ofxShadowMapLight extends ofLight - you can use it just like a regular light
+    // it's set up as a spotlight, all the shadow work + lighting must be handled in a shader
+    // there's an example shader in
+    
+    // shadow map resolution (must be power of 2), field of view, near, far
+    // the larger the shadow map resolution, the better the detail, but slower
+    m_shadowLight.setup( 2048, 45.0f, 0.1f, 800.0f );
+    m_shadowLight.setBlurLevel(4.0f); // amount we're blurring to soften the shadows
+    
+    m_shadowLight.setAmbientColor( ofFloatColor( 0.0f, 0.0f, 0.0f, 1.0f ) );
+    m_shadowLight.setDiffuseColor( ofFloatColor( 0.9f, 0.9f, 0.9f, 1.0f ) );
+    m_shadowLight.setSpecularColor( ofFloatColor( 1.0f, 1.0f, 1.0f, 1.0f ) );
+    
+    m_shadowLight.setPosition( 1000.0f, -1000.0f, 450.0f );
+    
+    ofSetGlobalAmbientColor( ofFloatColor( 0.05f, 0.05f, 0.05f ) );
 }
 
 void enableFog(float nearFog, float farFog) {
@@ -140,7 +195,11 @@ void testApp::setupMesh() {
 	model.loadModel("model.dae");
 	objectMesh = model.getMesh(0);
 	int n = objectMesh.getNumVertices();
-	objectPoints.resize(n);
+    for(int i = 0; i < n; i++) {
+        objectMesh.addColor(ofColor::wheat);
+        objectMesh.setNormal(i, objectMesh.getNormal(i).getScaled(-1));
+    }
+    objectPoints.resize(n);
 	imagePoints.resize(n);
 	referencePoints.resize(n, false);
 	for(int i = 0; i < n; i++) {
@@ -162,7 +221,7 @@ void testApp::render() {
 	if(useLights) {
 		light.enable();
 		ofEnableLighting();
-		glShadeModel(GL_SMOOTH);
+		glShadeModel(GL_FLAT);
 		glEnable(GL_NORMALIZE);
 	}
 	
@@ -201,9 +260,7 @@ void testApp::render() {
 	switch(geti("drawMode")) {
 		case 0: // faces
 			if(useShader) shader.begin();
-			glEnable(GL_CULL_FACE);
-			glCullFace(GL_BACK);
-			objectMesh.drawFaces();
+			objectMesh.draw();
 			if(useShader) shader.end();
 			break;
 		case 1: // fullWireframe
@@ -217,6 +274,67 @@ void testApp::render() {
 		case 3: // occludedWireframe
 			LineArt::draw(objectMesh, false, transparentBlack, useShader ? &shader : NULL);
 			break;
+        case 4: // kinect
+            
+            cam.end();
+
+            glEnable(GL_CULL_FACE);
+			glCullFace(GL_BACK);
+            
+            
+            glEnable( GL_DEPTH_TEST );
+            
+            ofDisableAlphaBlending();
+            
+            lightAngle += 0.25f;
+            
+            
+            m_shadowLight.lookAt( ofVec3f(0.0,0.0,-200.0) );
+            m_shadowLight.orbit( lightAngle, -300.0, 300.0f, ofVec3f(0.0,0.0,0.0) );
+            
+            m_shadowLight.enable();
+            
+            // render linear depth buffer from light view
+            m_shadowLight.beginShadowMap();
+			objectMesh.drawFaces();
+            m_shadowLight.endShadowMap();
+            
+            // render final scene
+            glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+            
+            ofBackgroundGradient(ofColor::black, ofColor::darkGray);
+            
+            m_shader.begin();
+            
+            m_shadowLight.bindShadowMapTexture(0); // bind shadow map texture to unit 0
+            m_shader.setUniform1i("u_ShadowMap", 0); // set uniform to unit 0
+            m_shader.setUniform1f("u_LinearDepthConstant", m_shadowLight.getLinearDepthScalar()); // set near/far linear scalar
+            m_shader.setUniformMatrix4f("u_ShadowTransMatrix", m_shadowLight.getShadowMatrix(cam)); // specify our shadow matrix
+            
+            cam.begin();
+            
+            m_shadowLight.enable();
+			objectMesh.drawFaces();
+            m_shadowLight.disable();
+            
+            glDisable(GL_CULL_FACE);
+            m_shadowLight.draw();
+            glEnable(GL_CULL_FACE);
+            
+            cam.end();
+            
+            m_shadowLight.unbindShadowMapTexture();
+            
+            m_shader.end();
+            
+            
+            // Debug shadowmap
+            m_shadowLight.debugShadowMap();
+            
+            cam.begin();
+
+            break;
+            
 	}
 	glPopAttrib();
 	if(useLights) {
@@ -366,8 +484,8 @@ void testApp::setupControlPanel() {
 	panel.addToggle("setupMode", true);
 	panel.addSlider("scale", 1, .1, 25);
 	panel.addSlider("backgroundColor", 0, 0, 255, true);
-	panel.addMultiToggle("drawMode", 3, variadic("faces")("fullWireframe")("outlineWireframe")("occludedWireframe"));
-	panel.addMultiToggle("shading", 0, variadic("none")("lights")("shader"));
+	panel.addMultiToggle("drawMode", 0, variadic("faces")("fullWireframe")("outlineWireframe")("occludedWireframe")("kinect"));
+	panel.addMultiToggle("shading", 1, variadic("none")("lights")("shader"));
 	panel.addToggle("loadCalibration", false);
 	panel.addToggle("saveCalibration", false);
 	
@@ -385,6 +503,17 @@ void testApp::setupControlPanel() {
 	panel.addToggle("CV_CALIB_ZERO_TANGENT_DIST", true);
 	panel.addToggle("CV_CALIB_FIX_PRINCIPAL_POINT", false);
 	
+	panel.addPanel("Kinect");
+	panel.addSlider("kinectPositionX", 0, -1000, 1000);
+	panel.addSlider("kinectPositionY", 0, -1000, 1000);
+	panel.addSlider("kinectPositionZ", 0, -1000, 1000);
+    panel.addSlider("kinectRotationX", 0, -180, 180);
+	panel.addSlider("kinectRotationY", 0, -180, 180);
+	panel.addSlider("kinectRotationZ", 0, -180, 180);
+    panel.addSlider("kinectScale", 1, 0, 2);
+	
+    panel.addSlider("rotationAngle", 0, -10000, 10000);
+	
 	panel.addPanel("Rendering");
 	panel.addSlider("lineWidth", 2, 1, 8, true);
 	panel.addToggle("useSmoothing", false);
@@ -394,10 +523,11 @@ void testApp::setupControlPanel() {
 	panel.addSlider("screenPointSize", 2, 1, 16, true);
 	panel.addSlider("selectedPointSize", 8, 1, 16, true);
 	panel.addSlider("selectionRadius", 12, 1, 32);
-	panel.addSlider("lightX", 200, -1000, 1000);
-	panel.addSlider("lightY", 400, -1000, 1000);
-	panel.addSlider("lightZ", 800, -1000, 1000);
+	panel.addSlider("lightX", 200, -10000, 10000);
+	panel.addSlider("lightY", 400, -10000, 10000);
+	panel.addSlider("lightZ", -800, -10000, 10000);
 	panel.addToggle("randomLighting", false);
+	panel.addToggle("kinectLighting", true);
 	
 	panel.addPanel("Internal");
 	panel.addToggle("validShader", true);
@@ -483,6 +613,7 @@ void testApp::drawSelectionMode() {
 		enableFog(getf("fogNear"), getf("fogFar"));
 	}
 	render();
+    drawPointCloud();
 	if(getb("useFog")) {
 		disableFog();
 	}
@@ -596,5 +727,64 @@ void testApp::drawRenderMode() {
 				setb("hoverSelected", false);
 			}
 		}
+        
 	}
 }
+
+void testApp::drawPointCloud() {
+	int w = 640;
+	int h = 480;
+	ofMesh mesh;
+	mesh.setMode(OF_PRIMITIVE_POINTS);
+	int step = 3;
+    
+    ofVec3f closestPoint = ofVec3f(0,0,10000);
+    ofVec3f kinectOrigin = ofVec3f(getf("kinectPositionX"), getf("kinectPositionY"), getf("kinectPositionZ"));
+    ofVec3f kinectRotation = ofVec3f(getf("kinectRotationX"), getf("kinectRotationY"), getf("kinectRotationZ"));
+    float kinectScale = getf("kinectScale");
+    
+    closestPoint.rotate(kinectRotation.x, kinectRotation.y, kinectRotation.z);
+    closestPoint *= ofVec3f(kinectScale,kinectScale, kinectScale);
+    closestPoint += kinectOrigin;
+    
+	for(int y = 0; y < h; y += step) {
+		for(int x = 0; x < w; x += step) {
+			if(kinect.getDistanceAt(x, y) > 0) {
+                ofVec3f v = kinect.getWorldCoordinateAt(x, y) * ofVec3f(1,-1,-1);
+                v.rotate(kinectRotation.x, kinectRotation.y, kinectRotation.z);
+                v *= ofVec3f(kinectScale,kinectScale, kinectScale);
+                v += kinectOrigin;
+                if(getb("kinectLighting") && v.distance(kinectOrigin) < closestPoint.distance(kinectOrigin)) {
+                    closestPoint = v;
+                }
+				mesh.addColor(kinect.getColorAt(x,y));
+				mesh.addVertex(v);
+			}
+		}
+	}
+    
+    float smoothFactor = 0.075;
+    float invSmoothFactor = 1.0 - smoothFactor;
+
+    setf("lightX", (getf("lightX")*invSmoothFactor) + (smoothFactor*closestPoint.x));
+    setf("lightY", (getf("lightY")*invSmoothFactor) + (smoothFactor*closestPoint.y));
+    setf("lightZ", (getf("lightZ")*invSmoothFactor) + (smoothFactor*closestPoint.z));
+    
+	glPointSize(3);
+	ofPushMatrix();
+	// the projected points are 'upside down' and 'backwards'
+	ofEnableDepthTest();
+	mesh.drawVertices();
+    ofDrawAxis(10);
+    //ofEnableLighting();
+    ofDrawSphere(ofVec3f(getf("lightX"), getf("lightY"), getf("lightZ")), 2);
+	//ofDisableLighting();
+    ofDisableDepthTest();
+	ofPopMatrix();
+}
+
+//--------------------------------------------------------------
+void testApp::exit() {
+	kinect.close();
+}
+
