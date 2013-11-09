@@ -254,7 +254,7 @@ void modelDisplay::setupControlPanel() {
 void modelDisplay::updateRenderMode() {
 	// generate camera matrix given aov guess
 	float aov = getf("aov");
-	Size2i imageSize(ofGetWidth(), ofGetHeight());
+	Size2i imageSize(displayRect.width, displayRect.height);
 	float f = imageSize.width * ofDegToRad(aov); // i think this is wrong, but it's optimized out anyway
 	Point2f c = Point2f(imageSize) * (1. / 2);
 	Mat1d cameraMatrix = (Mat1d(3, 3) <<
@@ -303,8 +303,8 @@ void modelDisplay::drawLabeledPoint(int label, ofVec2f position, ofColor color, 
 	//glEnable(GL_DEPTH_TEST);
 	ofVec2f tooltipOffset(5, -25);
 	ofSetColor(color);
-	float w = ofGetWidth();
-	float h = ofGetHeight();
+	float w = displayRect.width;
+	float h = displayRect.height;
 	ofSetLineWidth(1.5);
 	ofLine(position - ofVec2f(w,0), position + ofVec2f(w,0));
 	ofLine(position - ofVec2f(0,h), position + ofVec2f(0,h));
