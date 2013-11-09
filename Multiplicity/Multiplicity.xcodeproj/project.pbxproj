@@ -57,6 +57,7 @@
 		7A37D0D8182676DB00D1409A /* usb_libusb10.c in Sources */ = {isa = PBXBuildFile; fileRef = 7A37D0B9182676DB00D1409A /* usb_libusb10.c */; };
 		7A37D0DA182676DB00D1409A /* ofxKinect.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7A37D0D0182676DB00D1409A /* ofxKinect.cpp */; };
 		7A78CB4918269F4A00E41A90 /* shadowMapLight.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7A78CB4818269F4A00E41A90 /* shadowMapLight.cpp */; };
+		7A95F6E7182EA418000BACB2 /* modelDisplay.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7A95F6E5182EA418000BACB2 /* modelDisplay.cpp */; };
 		7AC0B8E41825496200B19856 /* ofxAssimpAnimation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7AC0B8DD1825491600B19856 /* ofxAssimpAnimation.cpp */; };
 		7AC0B8E51825496500B19856 /* ofxAssimpMeshHelper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7AC0B8DF1825491600B19856 /* ofxAssimpMeshHelper.cpp */; };
 		7AC0B8E71825497A00B19856 /* ofxAssimpModelLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7AC0B8E11825491600B19856 /* ofxAssimpModelLoader.cpp */; };
@@ -384,6 +385,8 @@
 		7A37D0D1182676DB00D1409A /* ofxKinect.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ofxKinect.h; sourceTree = "<group>"; };
 		7A78CB4818269F4A00E41A90 /* shadowMapLight.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = shadowMapLight.cpp; sourceTree = "<group>"; };
 		7A78CB4A18269F5900E41A90 /* shadowMapLight.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = shadowMapLight.h; sourceTree = "<group>"; };
+		7A95F6E5182EA418000BACB2 /* modelDisplay.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = modelDisplay.cpp; sourceTree = "<group>"; };
+		7A95F6E6182EA418000BACB2 /* modelDisplay.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = modelDisplay.h; sourceTree = "<group>"; };
 		7AC0B8B41825491600B19856 /* aiAnim.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = aiAnim.h; sourceTree = "<group>"; };
 		7AC0B8B51825491600B19856 /* aiAssert.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = aiAssert.h; sourceTree = "<group>"; };
 		7AC0B8B61825491600B19856 /* aiCamera.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = aiCamera.h; sourceTree = "<group>"; };
@@ -1934,6 +1937,8 @@
 				274D5242150C24FF00521B70 /* testApp.cpp */,
 				274D5243150C24FF00521B70 /* testApp.h */,
 				E4B69E1D0A3A1BDC003C02F2 /* main.cpp */,
+				7A95F6E5182EA418000BACB2 /* modelDisplay.cpp */,
+				7A95F6E6182EA418000BACB2 /* modelDisplay.h */,
 			);
 			path = src;
 			sourceTree = SOURCE_ROOT;
@@ -2070,6 +2075,7 @@
 				274D64EE150C25AD00521B70 /* guiValue.cpp in Sources */,
 				7A78CB4918269F4A00E41A90 /* shadowMapLight.cpp in Sources */,
 				274D64EF150C25AD00521B70 /* ofxControlPanel.cpp in Sources */,
+				7A95F6E7182EA418000BACB2 /* modelDisplay.cpp in Sources */,
 				274D64F0150C25AD00521B70 /* simpleColor.cpp in Sources */,
 				7A37D0D8182676DB00D1409A /* usb_libusb10.c in Sources */,
 				274D64F1150C25AD00521B70 /* simpleFileLister.cpp in Sources */,

@@ -37,20 +37,20 @@ void testApp::setup() {
 
     // print the intrinsic IR sensor values
 	if(kinect.isConnected()) {
-		ofLogNotice() << "sensor-emitter dist: " << kinect.getSensorEmitterDistance() << "cm";
-		ofLogNotice() << "sensor-camera dist:  " << kinect.getSensorCameraDistance() << "cm";
-		ofLogNotice() << "zero plane pixel size: " << kinect.getZeroPlanePixelSize() << "mm";
-		ofLogNotice() << "zero plane dist: " << kinect.getZeroPlaneDistance() << "mm";
+		ofLogNotice() << "sensor-emitter dist: "    << kinect.getSensorEmitterDistance()    << "cm";
+		ofLogNotice() << "sensor-camera dist:  "    << kinect.getSensorCameraDistance()     << "cm";
+		ofLogNotice() << "zero plane pixel size: "  << kinect.getZeroPlanePixelSize()       << "mm";
+		ofLogNotice() << "zero plane dist: "        << kinect.getZeroPlaneDistance()        << "mm";
 	}
-    
 	ofSetDrawBitmapMode(OF_BITMAPMODE_MODEL_BILLBOARD);
 	ofSetVerticalSync(true);
+    ofSetWindowPosition(0, 0);
+    ofSetWindowShape(ofGetScreenWidth(), ofGetScreenWidth()*(9/(2*16.)) );
 	calibrationReady = false;
 	setupMesh();	
 	setupControlPanel();
     m_shader.load( "shaders/mainScene.vert", "shaders/mainScene.frag" );
     setupLights();
-
 }
 
 void testApp::update() {
@@ -765,10 +765,12 @@ void testApp::drawPointCloud() {
     
     float smoothFactor = 0.075;
     float invSmoothFactor = 1.0 - smoothFactor;
-
-    setf("lightX", (getf("lightX")*invSmoothFactor) + (smoothFactor*closestPoint.x));
-    setf("lightY", (getf("lightY")*invSmoothFactor) + (smoothFactor*closestPoint.y));
-    setf("lightZ", (getf("lightZ")*invSmoothFactor) + (smoothFactor*closestPoint.z));
+    
+    if(getb("kinectLighting")){
+        setf("lightX", (getf("lightX")*invSmoothFactor) + (smoothFactor*closestPoint.x));
+        setf("lightY", (getf("lightY")*invSmoothFactor) + (smoothFactor*closestPoint.y));
+        setf("lightZ", (getf("lightZ")*invSmoothFactor) + (smoothFactor*closestPoint.z));
+    }
     
 	glPointSize(3);
 	ofPushMatrix();

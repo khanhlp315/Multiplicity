@@ -5,7 +5,7 @@
 	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
 	<false/>
 	<key>IDESourceControlProjectIdentifier</key>
-	<string>E32F7606-A75D-4E26-BEAB-477CCEFB5091</string>
+	<string>C32CB76A-F653-418F-909D-FC878A1EA64B</string>
 	<key>IDESourceControlProjectName</key>
 	<string>Multiplicity</string>
 	<key>IDESourceControlProjectOriginsDictionary</key>
@@ -14,8 +14,8 @@
 		<string>https://github.com/kylemcdonald/ofxCv.git</string>
 		<key>1B3AEC13-64F7-43A4-9171-6E1F2D55B4AA</key>
 		<string>https://github.com/kylemcdonald/ofxControlPanel.git</string>
-		<key>864ABDBB-8318-41D3-9F11-4C8F2A1B0FCC</key>
-		<string>https://github.com/YCAMInterlab/ProCamToolkit.git</string>
+		<key>A336ADE1-1E1C-4C66-9F45-26D29FBF7DF2</key>
+		<string>https://github.com/olekristensen/ProCamToolkit.git</string>
 	</dict>
 	<key>IDESourceControlProjectPath</key>
 	<string>Multiplicity/Multiplicity.xcodeproj/project.xcworkspace</string>
@@ -25,15 +25,15 @@
 		<string>../../../../../addons/ofxCv</string>
 		<key>1B3AEC13-64F7-43A4-9171-6E1F2D55B4AA</key>
 		<string>../../../../../addons/ofxControlPanel</string>
-		<key>864ABDBB-8318-41D3-9F11-4C8F2A1B0FCC</key>
+		<key>A336ADE1-1E1C-4C66-9F45-26D29FBF7DF2</key>
 		<string>../../..</string>
 	</dict>
 	<key>IDESourceControlProjectURL</key>
-	<string>https://github.com/YCAMInterlab/ProCamToolkit.git</string>
+	<string>https://github.com/olekristensen/ProCamToolkit.git</string>
 	<key>IDESourceControlProjectVersion</key>
 	<integer>110</integer>
 	<key>IDESourceControlProjectWCCIdentifier</key>
-	<string>864ABDBB-8318-41D3-9F11-4C8F2A1B0FCC</string>
+	<string>A336ADE1-1E1C-4C66-9F45-26D29FBF7DF2</string>
 	<key>IDESourceControlProjectWCConfigurations</key>
 	<array>
 		<dict>
@@ -56,7 +56,7 @@
 			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
 			<string>public.vcs.git</string>
 			<key>IDESourceControlWCCIdentifierKey</key>
-			<string>864ABDBB-8318-41D3-9F11-4C8F2A1B0FCC</string>
+			<string>A336ADE1-1E1C-4C66-9F45-26D29FBF7DF2</string>
 			<key>IDESourceControlWCCName</key>
 			<string>ProCamToolkit</string>
 		</dict>
