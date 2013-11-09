@@ -8,6 +8,7 @@
 #include "ofxKinect.h"
 #include "LineArt.h"
 #include "shadowMapLight.h"
+#include "modelDisplay.h"
 
 
 class testApp : public ofBaseApp {
@@ -41,6 +42,9 @@ public:
     void drawPointCloud();
 	
 	ofxKinect kinect;
+    
+    modelDisplay topDisplay;
+    modelDisplay bottomDisplay;
 	
 	bool bThreshWithOpenCV;
 	bool bDrawPointCloud;
@@ -52,26 +56,12 @@ public:
     
     float lightAngle;
 
-	ofxAssimpModelLoader model;	
-	ofEasyCam cam;
-	ofVboMesh objectMesh;
-	ofMesh imageMesh;
 	ofLight light;
 	ofxAutoControlPanel panel;
 	
     ShadowMapLight m_shadowLight;
     ofShader m_shader;
 
-    
-	vector<cv::Point3f> objectPoints;
-	vector<cv::Point2f> imagePoints;
-	vector<bool> referencePoints;
-	
-	cv::Mat rvec, tvec;
-	ofMatrix4x4 modelMatrix;
-	ofxCv::Intrinsics intrinsics;
-	bool calibrationReady;
-	
 	Poco::Timestamp lastFragTimestamp, lastVertTimestamp;
 	ofShader shader;
 };
