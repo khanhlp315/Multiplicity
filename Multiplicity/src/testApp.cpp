@@ -65,11 +65,14 @@ void testApp::setup() {
 
 void testApp::update() {
     
-   // kinect.update();
+   kinect.update();
     
     // there is a new frame and we are connected
 	if(kinect.isFrameNew()) {
 		
+        updatePointCloud();
+        
+        
 //      grayImage.setFromPixels(kinect.getDepthPixels(), kinect.width, kinect.height);
 
 		// update the cv images
@@ -132,8 +135,9 @@ void testApp::setupLights() {
     m_shadowLight.setPosition( 1000.0f, -1000.0f, 450.0f );
     
     ofSetGlobalAmbientColor( ofFloatColor( 0.01f, 0.01f, 0.01f ) );
-    
+        
     light.setDiffuseColor(ofFloatColor::wheat);
+    
 }
 
 void testApp::draw() {
@@ -286,34 +290,35 @@ void testApp::setupControlPanel() {
 
 }
 
-void testApp::drawPointCloud() {
+void testApp::updatePointCloud() {
 	int w = 640;
 	int h = 480;
-	ofMesh mesh;
-	mesh.setMode(OF_PRIMITIVE_POINTS);
-	int step = 3;
+    kinectMesh.clear();
+	kinectMesh.setMode(OF_PRIMITIVE_POINTS);
+	int step = 4;
     
-    ofVec3f closestPoint = ofVec3f(0,0,10000);
-    ofVec3f kinectOrigin = ofVec3f(getf("kinectPositionX"), getf("kinectPositionY"), getf("kinectPositionZ"));
-    ofVec3f kinectRotation = ofVec3f(getf("kinectRotationX"), getf("kinectRotationY"), getf("kinectRotationZ"));
-    float kinectScale = getf("kinectScale");
+    bool kinectLighting = getb("kinectLighting");
+    kincetClosestPoint = ofVec3f(0,0,10000);
+    kinectOrigin = ofVec3f(getf("kinectPositionX"), getf("kinectPositionY"), getf("kinectPositionZ"));
+    kinectRotation = ofVec3f(getf("kinectRotationX"), getf("kinectRotationY"), getf("kinectRotationZ"));
+    kinectScale = getf("kinectScale");
     
-    closestPoint.rotate(kinectRotation.x, kinectRotation.y, kinectRotation.z);
-    closestPoint *= ofVec3f(kinectScale,kinectScale, kinectScale);
-    closestPoint += kinectOrigin;
+    kincetClosestPoint.rotate(kinectRotation.x, kinectRotation.y, kinectRotation.z);
+    kincetClosestPoint *= ofVec3f(kinectScale,kinectScale, kinectScale);
+    kincetClosestPoint += kinectOrigin;
     
 	for(int y = 0; y < h; y += step) {
 		for(int x = 0; x < w; x += step) {
 			if(kinect.getDistanceAt(x, y) > 0) {
-                ofVec3f v = kinect.getWorldCoordinateAt(x, y) * ofVec3f(1,-1,-1);
+                ofVec3f v = kinect.getWorldCoordinateAt(x, y) * ofVec3f(1,1,1);
                 v.rotate(kinectRotation.x, kinectRotation.y, kinectRotation.z);
                 v *= ofVec3f(kinectScale,kinectScale, kinectScale);
                 v += kinectOrigin;
-                if(getb("kinectLighting") && v.distance(kinectOrigin) < closestPoint.distance(kinectOrigin)) {
-                    closestPoint = v;
+                if(kinectLighting && v.distance(kinectOrigin) < kincetClosestPoint.distance(kinectOrigin)) {
+                    kincetClosestPoint = v;
                 }
-				mesh.addColor(kinect.getColorAt(x,y));
-				mesh.addVertex(v);
+				kinectMesh.addColor(kinect.getColorAt(x,y));
+				kinectMesh.addVertex(v);
 			}
 		}
 	}
@@ -322,20 +327,22 @@ void testApp::drawPointCloud() {
     float invSmoothFactor = 1.0 - smoothFactor;
     
     if(getb("kinectLighting")){
-        setf("lightX", (getf("lightX")*invSmoothFactor) + (smoothFactor*closestPoint.x));
-        setf("lightY", (getf("lightY")*invSmoothFactor) + (smoothFactor*closestPoint.y));
-        setf("lightZ", (getf("lightZ")*invSmoothFactor) + (smoothFactor*closestPoint.z));
+        setf("lightX", (getf("lightX")*invSmoothFactor) + (smoothFactor*kincetClosestPoint.x));
+        setf("lightY", (getf("lightY")*invSmoothFactor) + (smoothFactor*kincetClosestPoint.y));
+        setf("lightZ", (getf("lightZ")*invSmoothFactor) + (smoothFactor*kincetClosestPoint.z));
     }
-    
+}
+
+void testApp::drawPointCloud() {
+	   
 	glPointSize(3);
 	ofPushMatrix();
-	// the projected points are 'upside down' and 'backwards'
 	ofEnableDepthTest();
-	mesh.drawVertices();
+	kinectMesh.drawVertices();
     ofDrawSphere(ofVec3f(getf("lightX"), getf("lightY"), getf("lightZ")), 2);
     ofDisableDepthTest();
 	ofPopMatrix();
-
+    
     if (getb("setupMode")) {
         ofPushMatrix();
         ofTranslate(kinectOrigin);
@@ -343,13 +350,14 @@ void testApp::drawPointCloud() {
         ofRotateY(kinectRotation.y);
         ofRotateZ(kinectRotation.z);
         ofScale(kinectScale, kinectScale, kinectScale);
-
+        
         drawLabeledAxes(10);
         
         ofPopMatrix();
     }
-
+    
 }
+
 
 //--------------------------------------------------------------
 void testApp::exit() {

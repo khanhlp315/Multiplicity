@@ -39,10 +39,16 @@ public:
     void loadCalibration();
 	void saveCalibration();
     void setupLights();
-
+    
+    void updatePointCloud();
     void drawPointCloud();
-	
+    
 	ofxKinect kinect;
+    ofMesh kinectMesh;
+    ofVec3f kincetClosestPoint;
+    ofVec3f kinectOrigin;
+    ofVec3f kinectRotation;
+    float kinectScale;
     
     modelDisplay topDisplay;
     modelDisplay bottomDisplay;

@@ -45,7 +45,9 @@ void modelDisplay::update(){
 	if(getb("selectionMode")) {
 		cam.enableMouseInput();
 	} else {
-		updateRenderMode();
+        if (getb("setupMode")) {
+            updateRenderMode();
+        }
 		cam.disableMouseInput();
 	}
 }
@@ -53,6 +55,7 @@ void modelDisplay::update(){
 void modelDisplay::draw() {
     if(getb("loadCalibration")) {
 		loadCalibration();
+        updateRenderMode();
 		setb("loadCalibration", false);
 	}
 	if(getb("saveCalibration")) {
@@ -331,6 +334,8 @@ void modelDisplay::drawLabeledPoint(int label, ofVec2f position, ofColor color, 
 
 void modelDisplay::drawSelectionMode() {
     
+    testApp * theApp = (testApp*)ofGetAppPtr();
+    
     glScissor(displayRect.x,
               displayRect.y,
               displayRect.width,
@@ -342,6 +347,7 @@ void modelDisplay::drawSelectionMode() {
 	ofSetColor(255);
 	cam.begin();
 	render();
+    theApp->drawPointCloud();
 	if(getb("setupMode")) {
 		imageMesh = getProjectedMesh(objectMesh);
 	}
@@ -475,6 +481,7 @@ void modelDisplay::render() {
 
 	ofPushStyle();
     ofEnableSmoothing();
+    ofEnableDepthTest();
 
     ofSetLineWidth(appPanel->getValueI("lineWidth"));
     
@@ -485,7 +492,7 @@ void modelDisplay::render() {
     
 	if(useLights) {
 		theApp->light.enable();
-		glShadeModel(GL_FLAT);
+		glShadeModel(GL_SMOOTH);
         ofEnableLighting();
 		glEnable(GL_NORMALIZE);
     }
@@ -558,8 +565,7 @@ void modelDisplay::render() {
 	switch(appPanel->getValueI("drawMode")) {
 		case 0: // faces
             if(useShader) theApp->shader.begin();
-            glEnable(GL_CULL_FACE);
-            glCullFace(GL_FRONT);
+            glDisable(GL_CULL_FACE);
             objectMesh.drawFaces();
             if(useShader) theApp->shader.end();
 			break;
@@ -572,7 +578,6 @@ void modelDisplay::render() {
         
     }
     
-    
 	glPopAttrib();
     if(useLights){
         theApp->light.disable();
@@ -584,8 +589,6 @@ void modelDisplay::render() {
         ofDisableLighting();
     }
 
-    theApp->drawPointCloud();
-    
     if(getb("setupMode")){
         drawLabeledAxes(10);
     }

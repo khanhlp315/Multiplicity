@@ -70,9 +70,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "E4B69B5A0A3A1756003C02F2"
-            BuildableName = "mapamok.app"
-            BlueprintName = "mapamok"
-            ReferencedContainer = "container:mapamok.xcodeproj">
+            BuildableName = "Multiplicity.app"
+            BlueprintName = "Multiplicity"
+            ReferencedContainer = "container:Multiplicity.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>
