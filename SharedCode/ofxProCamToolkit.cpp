@@ -416,7 +416,7 @@ GLint viewport[4];
 void updateProjectionState() {
 	glGetDoublev(GL_MODELVIEW_MATRIX, modelviewMatrix);
 	glGetDoublev(GL_PROJECTION_MATRIX, projectionMatrix);
-	glGetIntegerv(GL_VIEWPORT, viewport);
+	glGetIntegerv(GL_VIEWPORT, viewport);    
 }
 
 ofVec3f ofWorldToScreen(ofVec3f world) {

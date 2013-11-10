@@ -49,7 +49,6 @@ void modelDisplay::update(){
 }
 
 void modelDisplay::draw() {
-    ofViewport(displayRect);
     if(getb("loadCalibration")) {
 		loadCalibration();
 		setb("loadCalibration", false);
@@ -314,6 +313,7 @@ void modelDisplay::drawLabeledPoint(int label, ofVec2f position, ofColor color, 
 }
 
 void modelDisplay::drawSelectionMode() {
+    ofViewport(displayRect);
 	ofSetColor(255);
 	cam.begin();
 	float scale = getf("scale");
@@ -323,6 +323,7 @@ void modelDisplay::drawSelectionMode() {
 		imageMesh = getProjectedMesh(objectMesh);
 	}
 	cam.end();
+    ofViewport();
 	
 	if(getb("setupMode")) {
 		// draw all points cyan small
@@ -362,25 +363,27 @@ void modelDisplay::drawSelectionMode() {
 }
 
 void modelDisplay::drawRenderMode() {
-	glPushMatrix();
+    ofViewport(displayRect);
+    glPushMatrix();
 	glMatrixMode(GL_PROJECTION);
 	glPushMatrix();
 	glMatrixMode(GL_MODELVIEW);
-	
+	   
 	if(calibrationReady) {
 		intrinsics.loadProjectionMatrix(10, 2000);
 		applyMatrix(modelMatrix);
-		render();
-		if(getb("setupMode")) {
+        if(getb("setupMode")) {
 			imageMesh = getProjectedMesh(objectMesh);
 		}
-	}
+    }
 	
 	glPopMatrix();
 	glMatrixMode(GL_PROJECTION);
 	glPopMatrix();
 	glMatrixMode(GL_MODELVIEW);
-	
+
+    ofViewport();
+
 	if(getb("setupMode")) {
 		// draw all reference points cyan
 		int n = referencePoints.size();
@@ -429,7 +432,6 @@ void modelDisplay::drawRenderMode() {
 				setb("hoverSelected", false);
 			}
 		}
-        
 	}
 }
 

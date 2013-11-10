@@ -80,19 +80,19 @@ void testApp::update() {
 	}
 	light.setPosition(getf("lightX"), getf("lightY"), getf("lightZ"));
     
-    if(geti("setupMode") == 0){
+    if(getb("setupMode") == false){
         topDisplay.panel.setValueB("setupMode", false);
         bottomDisplay.panel.setValueB("setupMode", false);
-    }
-    
-    if(geti("setupMode") == 1){
-        topDisplay.panel.setValueB("setupMode", true);
-        bottomDisplay.panel.setValueB("setupMode", false);
-    }
-    
-    if(geti("setupMode") == 2){
-        topDisplay.panel.setValueB("setupMode", false);
-        bottomDisplay.panel.setValueB("setupMode", true);
+    } else {
+        if(geti("setupDisplay") == 0){
+            topDisplay.panel.setValueB("setupMode", true);
+            bottomDisplay.panel.setValueB("setupMode", false);
+        }
+        
+        if(geti("setupDisplay") == 1){
+            topDisplay.panel.setValueB("setupMode", false);
+            bottomDisplay.panel.setValueB("setupMode", true);
+        }
     }
     
     topDisplay.update();
@@ -146,18 +146,18 @@ void testApp::draw() {
 
 void testApp::keyPressed(int key) {
     
-    int setupMode = geti("setupMode");
+    int setupDisplay = geti("setupDisplay");
     
     ofxAutoControlPanel * thePanel;
     modelDisplay * theModel;
     
-    if(setupMode > 0){
-        if (setupMode == 1) {
+        if (setupDisplay == 0) {
             theModel = &topDisplay;
         }
-        if (setupMode == 2){
+        if (setupDisplay == 1){
             theModel = &bottomDisplay;
         }
+    
         thePanel = &(theModel->panel);
         
         if(key == OF_KEY_LEFT || key == OF_KEY_UP || key == OF_KEY_RIGHT|| key == OF_KEY_DOWN){
@@ -186,72 +186,73 @@ void testApp::keyPressed(int key) {
         if(key == '\n') { // deselect
             thePanel->setValueB("selected", false);
         }
-        
-    }
     
-    
-    if(key == '0'){
-        seti("setupMode", 0);
+    if(key == ' ') { // toggle render/select mode
+        thePanel->setValueB("selectionMode", !thePanel->getValueB("selectionMode"));
     }
+
+    
     if(key == '1'){
-        seti("setupMode", 1);
+        seti("setupDisplay", 0);
     }
     if(key == '2'){
-        seti("setupMode", 2);
+        seti("setupDisplay", 1);
     }
 }
 
 void testApp::mousePressed(int x, int y, int button) {
     
-    int setupMode = geti("setupMode");
+    int setupDisplay = geti("setupDisplay");
     
     ofxAutoControlPanel * thePanel;
     modelDisplay * theModel;
     
-    if(setupMode > 0){
-        if (setupMode == 1) {
-            theModel = &topDisplay;
-        }
-        if (setupMode == 2){
-            theModel = &bottomDisplay;
-        }
-        thePanel = &(theModel->panel);
-        
+    if (setupDisplay == 0) {
+        theModel = &topDisplay;
+    }
+    if (setupDisplay == 1){
+        theModel = &bottomDisplay;
+    }
+    
+    thePanel = &(theModel->panel);
+
+    
         thePanel->setValueB("selected", thePanel->getValueB("hoverSelected"));
         thePanel->setValueI("selectionChoice", thePanel->getValueI("hoverChoice"));
         if(thePanel->getValueB("selected")) {
             thePanel->setValueB("dragging", true);
         }
-    }
     
 }
 
 void testApp::mouseReleased(int x, int y, int button) {
-    int setupMode = geti("setupMode");
+    
+    int setupDisplay = geti("setupDisplay");
     
     ofxAutoControlPanel * thePanel;
     modelDisplay * theModel;
     
-    if(setupMode > 0){
-        if (setupMode == 1) {
-            theModel = &topDisplay;
-        }
-        if (setupMode == 2){
-            theModel = &bottomDisplay;
-        }
-        thePanel = &(theModel->panel);
+    if (setupDisplay == 0) {
+        theModel = &topDisplay;
+    }
+    if (setupDisplay == 1){
+        theModel = &bottomDisplay;
+    }
+    
+    thePanel = &(theModel->panel);
 
         thePanel->setValueB("dragging", false);
-    }
 }
 
 void testApp::setupControlPanel() {
 	panel.setup();
+    panel.setPosition(300, 10);
 	panel.msg = "tab hides the panel, space toggles render/selection mode, 'f' toggles fullscreen.";
 	
 	panel.addPanel("Interaction");
 	panel.addSlider("backgroundColor", 0, 0, 255, true);
-	panel.addMultiToggle("setupMode", 0, variadic("none")("top")("bottom"));
+	panel.addToggle("setupMode", false);
+	panel.addMultiToggle("setupDisplay", 0, variadic("top")("bottom"));
 	panel.addMultiToggle("drawMode", 0, variadic("faces")("fullWireframe"));
 	panel.addMultiToggle("shading", 1, variadic("none")("lights"));
 	panel.addToggle("loadCalibration", false);
