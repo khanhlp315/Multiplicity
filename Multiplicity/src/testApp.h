@@ -9,6 +9,7 @@
 #include "LineArt.h"
 #include "shadowMapLight.h"
 #include "modelDisplay.h"
+#include "userLight.h"
 
 
 class testApp : public ofBaseApp {
@@ -57,6 +58,9 @@ public:
     float lightAngle;
 
 	ofLight light;
+    
+    vector<userLight> lights;
+    
 	ofxAutoControlPanel panel;
 	
     ShadowMapLight m_shadowLight;

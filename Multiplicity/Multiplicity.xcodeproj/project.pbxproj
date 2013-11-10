@@ -48,6 +48,7 @@
 		274D657C150C25E300521B70 /* Tracker.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 274D651D150C25E300521B70 /* Tracker.cpp */; };
 		274D657D150C25E300521B70 /* Utilities.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 274D651E150C25E300521B70 /* Utilities.cpp */; };
 		274D657E150C25E300521B70 /* Wrappers.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 274D651F150C25E300521B70 /* Wrappers.cpp */; };
+		7A03B6E61830219A00C39298 /* userLight.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7A03B6E41830219A00C39298 /* userLight.cpp */; };
 		7A37D05E1826703500D1409A /* opencv.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 274D6766150C273500521B70 /* opencv.a */; };
 		7A37D061182671A500D1409A /* ofxAssimpTexture.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7A37D05F182671A500D1409A /* ofxAssimpTexture.cpp */; };
 		7A37D0D4182676DB00D1409A /* cameras.c in Sources */ = {isa = PBXBuildFile; fileRef = 7A37D0B1182676DB00D1409A /* cameras.c */; };
@@ -360,6 +361,8 @@
 		274D671F150C273500521B70 /* background_segm.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = background_segm.hpp; path = ../../../addons/ofxOpenCv/libs/opencv/include/opencv2/video/background_segm.hpp; sourceTree = SOURCE_ROOT; };
 		274D6720150C273500521B70 /* tracking.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = tracking.hpp; path = ../../../addons/ofxOpenCv/libs/opencv/include/opencv2/video/tracking.hpp; sourceTree = SOURCE_ROOT; };
 		274D6766150C273500521B70 /* opencv.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = opencv.a; path = ../../../addons/ofxOpenCv/libs/opencv/lib/osx/opencv.a; sourceTree = SOURCE_ROOT; };
+		7A03B6E41830219A00C39298 /* userLight.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = userLight.cpp; sourceTree = "<group>"; };
+		7A03B6E51830219A00C39298 /* userLight.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = userLight.h; sourceTree = "<group>"; };
 		7A37D05F182671A500D1409A /* ofxAssimpTexture.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ofxAssimpTexture.cpp; sourceTree = "<group>"; };
 		7A37D060182671A500D1409A /* ofxAssimpTexture.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ofxAssimpTexture.h; sourceTree = "<group>"; };
 		7A37D064182676DA00D1409A /* addon_config.mk */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = addon_config.mk; sourceTree = "<group>"; };
@@ -1939,6 +1942,8 @@
 				E4B69E1D0A3A1BDC003C02F2 /* main.cpp */,
 				7A95F6E5182EA418000BACB2 /* modelDisplay.cpp */,
 				7A95F6E6182EA418000BACB2 /* modelDisplay.h */,
+				7A03B6E41830219A00C39298 /* userLight.cpp */,
+				7A03B6E51830219A00C39298 /* userLight.h */,
 			);
 			path = src;
 			sourceTree = SOURCE_ROOT;
@@ -2072,6 +2077,7 @@
 				274D64EB150C25AD00521B70 /* guiTypeToggle.cpp in Sources */,
 				274D64EC150C25AD00521B70 /* guiTypeVairableLister.cpp in Sources */,
 				274D64ED150C25AD00521B70 /* guiTypeVideo.cpp in Sources */,
+				7A03B6E61830219A00C39298 /* userLight.cpp in Sources */,
 				274D64EE150C25AD00521B70 /* guiValue.cpp in Sources */,
 				7A78CB4918269F4A00E41A90 /* shadowMapLight.cpp in Sources */,
 				274D64EF150C25AD00521B70 /* ofxControlPanel.cpp in Sources */,

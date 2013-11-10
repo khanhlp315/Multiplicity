@@ -6,7 +6,9 @@
 //
 //
 
+
 #include "modelDisplay.h"
+#include "testApp.h"
 
 using namespace ofxCv;
 using namespace cv;
@@ -64,13 +66,12 @@ void modelDisplay::draw() {
 	}
 }
 
-
 void modelDisplay::setupMesh(string fileName) {
 	model.loadModel(fileName);
 	objectMesh = model.getMesh(0);
 	int n = objectMesh.getNumVertices();
     for(int i = 0; i < n; i++) {
-        objectMesh.addColor(ofColor::wheat);
+        objectMesh.addColor(ofColor::white);
         objectMesh.setNormal(i, objectMesh.getNormal(i).getScaled(-1));
     }
     objectPoints.resize(n);
@@ -82,7 +83,9 @@ void modelDisplay::setupMesh(string fileName) {
 }
 
 void modelDisplay::saveCalibration() {
-	string dirName = "calibration-" + name + "-" + ofGetTimestampString() + "/";
+    if (calibrationReady){
+//	string dirName = "calibration-" + name + "-" + ofGetTimestampString() + "/";
+	string dirName = "calibration-" + name + "/";
 	ofDirectory dir(dirName);
 	dir.create();
 	
@@ -122,7 +125,7 @@ void modelDisplay::saveCalibration() {
 	Mat eulerMat = (Mat_<double>(3,1) << euler.x, euler.y, euler.z);
 	fs << "euler" << eulerMat;
 	
-	ofFile basic("calibration-basic.txt", ofFile::WriteOnly);
+	ofFile basic(ofToDataPath(dirName + "calibration-basic.txt"), ofFile::WriteOnly);
 	ofVec3f position( tvec.at<double>(1), tvec.at<double>(2));
 	basic << "position (in world units):" << endl;
 	basic << "\tx: " << ofToString(tvec.at<double>(0), 2) << endl;
@@ -149,17 +152,26 @@ void modelDisplay::saveCalibration() {
 	
 	saveMat(Mat(objectPoints), dirName + "objectPoints.yml");
 	saveMat(Mat(imagePoints), dirName + "imagePoints.yml");
+    }
 }
 
 void modelDisplay::loadCalibration() {
     
     // retrieve advanced calibration folder
-    
+/*
     string calibPath;
     ofFileDialogResult result = ofSystemLoadDialog("Select a calibration folder", true, ofToDataPath("", true));
     calibPath = result.getPath();
+  */
     
-    // load objectPoints and imagePoints
+    string calibPath = "calibration-" + name;
+	ofDirectory dir(calibPath);
+    
+    calibPath = ofToDataPath(calibPath);
+    
+    try {
+
+        // load objectPoints and imagePoints
     
     Mat objPointsMat, imgPointsMat;
     loadMat( objPointsMat, calibPath + "/objectPoints.yml");
@@ -210,8 +222,14 @@ void modelDisplay::loadCalibration() {
     
     intrinsics.setup(cameraMatrix, imageSize);
     modelMatrix = makeMatrix(rvec, tvec);
-    
-    calibrationReady = true;
+
+        calibrationReady = true;
+        setb("selectionMode", false);
+
+    } catch (exception) {
+        calibrationReady = false;
+    }
+
 }
 
 void modelDisplay::setupControlPanel() {
@@ -222,8 +240,6 @@ void modelDisplay::setupControlPanel() {
 	panel.addPanel("Interaction");
 
     panel.addToggle("setupMode", false);
-
-    panel.addSlider("scale", 1, .1, 25);
 
 	panel.addToggle("loadCalibration", false);
 	panel.addToggle("saveCalibration", false);
@@ -248,12 +264,13 @@ void modelDisplay::setupControlPanel() {
 	panel.addSlider("selectionChoice", 0, 0, objectPoints.size(), true);
 	panel.addSlider("slowLerpRate", .001, 0, .01);
 	panel.addSlider("fastLerpRate", 1, 0, 1);
+    panel.setMinimized(true);
 }
 
 void modelDisplay::updateRenderMode() {
 	// generate camera matrix given aov guess
 	float aov = getf("aov");
-	Size2i imageSize(displayRect.width, displayRect.height);
+	Size2i imageSize(ofGetWidth(), ofGetHeight());
 	float f = imageSize.width * ofDegToRad(aov); // i think this is wrong, but it's optimized out anyway
 	Point2f c = Point2f(imageSize) * (1. / 2);
 	Mat1d cameraMatrix = (Mat1d(3, 3) <<
@@ -283,7 +300,7 @@ void modelDisplay::updateRenderMode() {
 			referenceImagePoints[0].push_back(imagePoints[i]);
 		}
 	}
-	const static int minPoints = 6;
+	const static int minPoints = 4;
 	if(referenceObjectPoints[0].size() >= minPoints) {
 		calibrateCamera(referenceObjectPoints, referenceImagePoints, imageSize, cameraMatrix, distCoeffs, rvecs, tvecs, flags);
 		rvec = rvecs[0];
@@ -313,18 +330,24 @@ void modelDisplay::drawLabeledPoint(int label, ofVec2f position, ofColor color, 
 }
 
 void modelDisplay::drawSelectionMode() {
+    
+    glScissor(displayRect.x,
+              displayRect.y,
+              displayRect.width,
+              displayRect.height);
+    
+    glEnable(GL_SCISSOR_TEST);
+
     ofViewport(displayRect);
 	ofSetColor(255);
 	cam.begin();
-	float scale = getf("scale");
-	ofScale(scale, scale, scale);
 	render();
 	if(getb("setupMode")) {
 		imageMesh = getProjectedMesh(objectMesh);
 	}
 	cam.end();
+
     ofViewport();
-	
 	if(getb("setupMode")) {
 		// draw all points cyan small
 		glPointSize(appPanel->getValueF("screenPointSize"));
@@ -360,29 +383,38 @@ void modelDisplay::drawSelectionMode() {
 			drawLabeledPoint(choice, selected, yellowPrint, ofColor::white, ofColor::black);
 		}
 	}
+
+    glDisable(GL_SCISSOR_TEST);
+
 }
 
 void modelDisplay::drawRenderMode() {
-    ofViewport(displayRect);
+    
+    glScissor(displayRect.x,
+              displayRect.y,
+              displayRect.width,
+              displayRect.height);
+    
+    glEnable(GL_SCISSOR_TEST);
+
     glPushMatrix();
 	glMatrixMode(GL_PROJECTION);
 	glPushMatrix();
 	glMatrixMode(GL_MODELVIEW);
-	   
+    
 	if(calibrationReady) {
 		intrinsics.loadProjectionMatrix(10, 2000);
 		applyMatrix(modelMatrix);
+        render();
         if(getb("setupMode")) {
 			imageMesh = getProjectedMesh(objectMesh);
 		}
     }
-	
+    
 	glPopMatrix();
 	glMatrixMode(GL_PROJECTION);
 	glPopMatrix();
 	glMatrixMode(GL_MODELVIEW);
-
-    ofViewport();
 
 	if(getb("setupMode")) {
 		// draw all reference points cyan
@@ -433,41 +465,131 @@ void modelDisplay::drawRenderMode() {
 			}
 		}
 	}
+    glDisable(GL_SCISSOR_TEST);
+
 }
 
 void modelDisplay::render() {
+
+    testApp * theApp = (testApp*)ofGetAppPtr();
+
 	ofPushStyle();
     ofEnableSmoothing();
-	ofSetColor(255);
-	glPushAttrib(GL_ALL_ATTRIB_BITS);
-	glEnable(GL_DEPTH_TEST);
-/*	if(useShader) {
+
+    ofSetLineWidth(appPanel->getValueI("lineWidth"));
+    
+    int shading = appPanel->getValueI("shading");
+	bool useLights = shading == 1;
+	bool useShadows = shading == 2;
+	bool useShader = shading == 3;
+    
+	if(useLights) {
+		theApp->light.enable();
+		glShadeModel(GL_FLAT);
+        ofEnableLighting();
+		glEnable(GL_NORMALIZE);
+    }
+    
+    if(useShadows){
+        cam.end();
+        glEnable( GL_DEPTH_TEST );
+        ofDisableAlphaBlending();
+        
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_FRONT);
+
+        glClear( GL_DEPTH_BUFFER_BIT );
+
+        
+        theApp->m_shadowLight.lookAt( ofVec3f(0.0,0.0,0.0) );
+        theApp->m_shadowLight.enable();
+
+        // render linear depth buffer from light view
+        theApp->m_shadowLight.beginShadowMap();
+        model.drawFaces();
+        theApp->m_shadowLight.endShadowMap();
+        
+        // render final scene
+        
+        glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+        
+        theApp->m_shader.begin();
+        
+        theApp->m_shadowLight.bindShadowMapTexture(0); // bind shadow map texture to unit 0
+        theApp->m_shader.setUniform1i("u_ShadowMap", 0); // set uniform to unit 0
+        theApp->m_shader.setUniform1f("u_LinearDepthConstant", theApp->m_shadowLight.getLinearDepthScalar()); // set near/far linear scalar
+        theApp->m_shader.setUniformMatrix4f("u_ShadowTransMatrix", theApp->m_shadowLight.getShadowMatrix(cam)); // specify our shadow matrix
+        
+        cam.begin();
+        
+        theApp->m_shadowLight.enable();
+        objectMesh.draw();
+        theApp->m_shadowLight.disable();
+        
+        cam.end();
+        
+        theApp->m_shadowLight.unbindShadowMapTexture();
+        
+        theApp->m_shader.end();
+    } else {
+    
+    ofSetColor(255);
+    glPushAttrib(GL_ALL_ATTRIB_BITS);
+    glEnable(GL_DEPTH_TEST);
+
+    
+	if(useShader) {
 		ofFile fragFile("shader.frag"), vertFile("shader.vert");
 		Poco::Timestamp fragTimestamp = fragFile.getPocoFile().getLastModified();
 		Poco::Timestamp vertTimestamp = vertFile.getPocoFile().getLastModified();
-		if(fragTimestamp != lastFragTimestamp || vertTimestamp != lastVertTimestamp) {
-			bool validShader = shader.load("shader");
-			setb("validShader", validShader);
+		if(fragTimestamp != theApp->lastFragTimestamp || vertTimestamp != theApp->lastVertTimestamp) {
+			bool validShader = theApp->shader.load("shader");
+			appPanel->setValueB("validShader", validShader);
 		}
-		lastFragTimestamp = fragTimestamp;
-		lastVertTimestamp = vertTimestamp;
+		theApp->lastFragTimestamp = fragTimestamp;
+		theApp->lastVertTimestamp = vertTimestamp;
 		
-		shader.begin();
-		shader.setUniform1f("elapsedTime", ofGetElapsedTimef());
-		shader.end();
+		theApp->shader.begin();
+		theApp->shader.setUniform1f("elapsedTime", ofGetElapsedTimef());
+		theApp->shader.end();
 	}
-*/
+
     ofColor transparentBlack(0, 0, 0, 0);
 	switch(appPanel->getValueI("drawMode")) {
 		case 0: // faces
-			objectMesh.draw();
+            if(useShader) theApp->shader.begin();
+            glEnable(GL_CULL_FACE);
+            glCullFace(GL_FRONT);
+            objectMesh.drawFaces();
+            if(useShader) theApp->shader.end();
 			break;
 		case 1: // fullWireframe
+            if(useShader) theApp->shader.begin();
 			objectMesh.drawWireframe();
+            if(useShader) theApp->shader.end();
 			break;
-            
-	}
+    }
+        
+    }
+    
+    
 	glPopAttrib();
+    if(useLights){
+        theApp->light.disable();
+        ofDisableLighting();
+    }
+    if (useShadows) {
+        theApp->m_shadowLight.disable();
+        theApp->m_shadowLight.debugShadowMap();
+        ofDisableLighting();
+    }
+
+    theApp->drawPointCloud();
+    
+    if(getb("setupMode")){
+        drawLabeledAxes(10);
+    }
+    
 	ofPopStyle();
 }
 

@@ -57,6 +57,10 @@ void testApp::setup() {
     m_shader.load( "shaders/mainScene.vert", "shaders/mainScene.frag" );
     setupLights();
 	ofSetWindowTitle("Multiplicity");
+    setb("loadCalibration", true);
+    panel.hide();
+    topDisplay.panel.hide();
+    bottomDisplay.panel.hide();
 }
 
 void testApp::update() {
@@ -79,6 +83,7 @@ void testApp::update() {
 		setf("lightZ", ofSignedNoise(1, 1, ofGetElapsedTimef()) * 1000);
 	}
 	light.setPosition(getf("lightX"), getf("lightY"), getf("lightZ"));
+    m_shadowLight.setPosition(getf("lightX"), getf("lightY"), getf("lightZ"));
     
     if(getb("setupMode") == false){
         topDisplay.panel.setValueB("setupMode", false);
@@ -95,6 +100,17 @@ void testApp::update() {
         }
     }
     
+    if(getb("loadCalibration")) {
+		topDisplay.loadCalibration();
+		bottomDisplay.loadCalibration();
+		setb("loadCalibration", false);
+	}
+	if(getb("saveCalibration")) {
+		topDisplay.saveCalibration();
+        bottomDisplay.saveCalibration();
+		setb("saveCalibration", false);
+	}
+    
     topDisplay.update();
     bottomDisplay.update();
     
@@ -104,19 +120,20 @@ void testApp::setupLights() {
     // ofxShadowMapLight extends ofLight - you can use it just like a regular light
     // it's set up as a spotlight, all the shadow work + lighting must be handled in a shader
     // there's an example shader in
-    
     // shadow map resolution (must be power of 2), field of view, near, far
     // the larger the shadow map resolution, the better the detail, but slower
-    m_shadowLight.setup( 2048, 45.0f, 0.1f, 800.0f );
+    m_shadowLight.setup( 2048, 5.0f, 0.1f, 1500.0f );
     m_shadowLight.setBlurLevel(4.0f); // amount we're blurring to soften the shadows
     
     m_shadowLight.setAmbientColor( ofFloatColor( 0.0f, 0.0f, 0.0f, 1.0f ) );
     m_shadowLight.setDiffuseColor( ofFloatColor( 0.9f, 0.9f, 0.9f, 1.0f ) );
     m_shadowLight.setSpecularColor( ofFloatColor( 1.0f, 1.0f, 1.0f, 1.0f ) );
-    
+        
     m_shadowLight.setPosition( 1000.0f, -1000.0f, 450.0f );
     
-    ofSetGlobalAmbientColor( ofFloatColor( 0.05f, 0.05f, 0.05f ) );
+    ofSetGlobalAmbientColor( ofFloatColor( 0.01f, 0.01f, 0.01f ) );
+    
+    light.setDiffuseColor(ofFloatColor::wheat);
 }
 
 void testApp::draw() {
@@ -124,23 +141,10 @@ void testApp::draw() {
 
 	ofBackground(geti("backgroundColor"));
 
-    int shading = geti("shading");
-	bool useLights = shading == 1;
-	if(useLights) {
-		light.enable();
-		ofEnableLighting();
-		glShadeModel(GL_FLAT);
-		glEnable(GL_NORMALIZE);
-	}
-	
-
     topDisplay.draw();
     bottomDisplay.draw();
-    if(useLights){
-        ofDisableLighting();
-    }
+    
     ofViewport();
-    drawPointCloud();
 	
 }
 
@@ -247,6 +251,7 @@ void testApp::mouseReleased(int x, int y, int button) {
 void testApp::setupControlPanel() {
 	panel.setup();
     panel.setPosition(300, 10);
+    panel.setXMLFilename("settings.xml");
 	panel.msg = "tab hides the panel, space toggles render/selection mode, 'f' toggles fullscreen.";
 	
 	panel.addPanel("Interaction");
@@ -254,7 +259,7 @@ void testApp::setupControlPanel() {
 	panel.addToggle("setupMode", false);
 	panel.addMultiToggle("setupDisplay", 0, variadic("top")("bottom"));
 	panel.addMultiToggle("drawMode", 0, variadic("faces")("fullWireframe"));
-	panel.addMultiToggle("shading", 1, variadic("none")("lights"));
+	panel.addMultiToggle("shading", 1, variadic("none")("lights")("shadows"));
 	panel.addToggle("loadCalibration", false);
 	panel.addToggle("saveCalibration", false);
     
@@ -275,8 +280,9 @@ void testApp::setupControlPanel() {
 	panel.addSlider("lightX", 200, -10000, 10000);
 	panel.addSlider("lightY", 400, -10000, 10000);
 	panel.addSlider("lightZ", -800, -10000, 10000);
-	panel.addToggle("randomLighting", false);
-	panel.addToggle("kinectLighting", true);
+	panel.addToggle("randomLighting", true);
+	panel.addToggle("kinectLighting", false);
+    panel.loadSettings("settings.xml");
 
 }
 
@@ -326,12 +332,23 @@ void testApp::drawPointCloud() {
 	// the projected points are 'upside down' and 'backwards'
 	ofEnableDepthTest();
 	mesh.drawVertices();
-    ofDrawAxis(10);
-    //ofEnableLighting();
     ofDrawSphere(ofVec3f(getf("lightX"), getf("lightY"), getf("lightZ")), 2);
-	//ofDisableLighting();
     ofDisableDepthTest();
 	ofPopMatrix();
+
+    if (getb("setupMode")) {
+        ofPushMatrix();
+        ofTranslate(kinectOrigin);
+        ofRotateX(kinectRotation.x);
+        ofRotateY(kinectRotation.y);
+        ofRotateZ(kinectRotation.z);
+        ofScale(kinectScale, kinectScale, kinectScale);
+
+        drawLabeledAxes(10);
+        
+        ofPopMatrix();
+    }
+
 }
 
 //--------------------------------------------------------------

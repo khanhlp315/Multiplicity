@@ -421,6 +421,7 @@ void updateProjectionState() {
 
 ofVec3f ofWorldToScreen(ofVec3f world) {
 	GLdouble x, y, z;
+    
 	gluProject(world.x, world.y, world.z, modelviewMatrix, projectionMatrix, viewport, &x, &y, &z);
 	ofVec3f screen(x, y, z);
 	screen.y = ofGetHeight() - screen.y;
