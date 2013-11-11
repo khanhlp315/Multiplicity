@@ -1,3 +1,15 @@
+# I am not qualified for this :)
+
+This fork is my attempt at shoehorning the insane greatness of Kyle McDonald's mapamok into a dualhead setup, where two projectors, possibly with heterogenous optics share the mapping of one object.
+
+If you want to play with an unharmed mapamok (and you should), go straight to the source at the [original repo](https://github.com/YCAMInterlab/ProCamToolkit).
+
+Otherwise have a look at the app Multiplicity
+
+Learing about matices / ole
+
+# Kyle's original readme
+
 ProCamToolkit is a collection software and code for [openFrameworks](http://openframeworks.cc/) aimed at making high level projector-camera calibration more accessible. It provides examples manual projector calibration using a model of a scene, projector-camera calibration using a reference pattern and gray code scanning, and multi-projector calibration using gray code scanning. A program called "mapamok" has emerged from ProCamToolkit as the most user-friendly app of the collection, and it's useful for experimenting with extremely fast projection mapping in situations where the scene can be modeled quickly (e.g., a collection of cuboids) or where the scene is modeled in advance (e.g., a 3D print, or a manufactured object like a car). Most of ProCamToolkit is written in an extremely modular way, making it possible to borrow snippets of code, including some chunks that are written with the goal of being contributed to the openFrameworks core.
 
 ProCamToolkit also includes work in progress towards new installations being developed during Guest Research Projector v.1 at [YCAM Interlab](http://interlab.ycam.jp/en/). This includes experiments with augmented shadows using multiple projectors, and projection mapping in the YCAM library.
