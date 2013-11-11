@@ -50,6 +50,7 @@ public:
 	ofEasyCam cam;
 	ofVboMesh objectMesh;
 	ofMesh imageMesh;
+    ofVboMesh displayMesh;
 	ofxAutoControlPanel panel;
     ofxAutoControlPanel * appPanel;
 	   

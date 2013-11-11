@@ -28,16 +28,9 @@ public:
 	void keyPressed(int key);
 	void mousePressed(int x, int y, int button);
 	void mouseReleased(int x, int y, int button);
-	
+	void windowResized(int w, int h);
+
 	void setupControlPanel();
-	void setupMesh();
-	void drawLabeledPoint(int label, ofVec2f position, ofColor color, ofColor bg = ofColor::black, ofColor fg = ofColor::white);
-	void updateRenderMode();
-	void drawSelectionMode();
-	void drawRenderMode();
-	void render();
-    void loadCalibration();
-	void saveCalibration();
     void setupLights();
     
     void updatePointCloud();

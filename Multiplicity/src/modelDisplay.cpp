@@ -172,8 +172,8 @@ void modelDisplay::loadCalibration() {
     
     calibPath = ofToDataPath(calibPath);
     
-    try {
-
+    if(dir.exists()){
+    
         // load objectPoints and imagePoints
     
     Mat objPointsMat, imgPointsMat;
@@ -210,11 +210,10 @@ void modelDisplay::loadCalibration() {
         imagePoints[i/2] = iP;
     }
     
-    
     // load the calibration-advanced yml
     
     FileStorage fs(ofToDataPath(calibPath + "/calibration-advanced.yml", true), FileStorage::READ);
-    
+
     Mat cameraMatrix;
     Size2i imageSize;
     fs["cameraMatrix"] >> cameraMatrix;
@@ -226,13 +225,11 @@ void modelDisplay::loadCalibration() {
     intrinsics.setup(cameraMatrix, imageSize);
     modelMatrix = makeMatrix(rvec, tvec);
 
-        calibrationReady = true;
-        setb("selectionMode", false);
-
-    } catch (exception) {
+    calibrationReady = true;
+    setb("selectionMode", false);
+    } else {
         calibrationReady = false;
     }
-
 }
 
 void modelDisplay::setupControlPanel() {
@@ -396,6 +393,10 @@ void modelDisplay::drawSelectionMode() {
 
 void modelDisplay::drawRenderMode() {
     
+    testApp * theApp = (testApp*)ofGetAppPtr();
+    
+    ofMesh calibratedMesh;
+
     glScissor(displayRect.x,
               displayRect.y,
               displayRect.width,
@@ -403,6 +404,7 @@ void modelDisplay::drawRenderMode() {
     
     glEnable(GL_SCISSOR_TEST);
 
+    glPushMatrix();
     glPushMatrix();
 	glMatrixMode(GL_PROJECTION);
 	glPushMatrix();
@@ -412,7 +414,7 @@ void modelDisplay::drawRenderMode() {
 		intrinsics.loadProjectionMatrix(10, 2000);
 		applyMatrix(modelMatrix);
         render();
-        if(getb("setupMode")) {
+        if(getb("setupMode") || imageMesh.getNumVertices() == 0) {
 			imageMesh = getProjectedMesh(objectMesh);
 		}
     }
@@ -421,7 +423,36 @@ void modelDisplay::drawRenderMode() {
 	glMatrixMode(GL_PROJECTION);
 	glPopMatrix();
 	glMatrixMode(GL_MODELVIEW);
+	glPopMatrix();
+    
+    // color vertices outside screen
 
+    ofRectangle cropRect = ofRectangle(displayRect);
+
+    if(name == "top" && calibrationReady){
+    vector<ofMeshFace> imageFaces = imageMesh.getUniqueFaces();
+    vector<ofMeshFace> objectFaces = objectMesh.getUniqueFaces();
+    vector<ofMeshFace> topObjectFaces;
+    vector<ofMeshFace> bottomObjectFaces;
+    int n = imageFaces.size();
+    int indices = 0;
+    for(int i = 0; i < n; i++) {
+        ofMeshFace imageFace = imageFaces.at(i);
+        if(
+           cropRect.inside(imageFace.getVertex(0).x,imageFace.getVertex(0).y)
+           && cropRect.inside(imageFace.getVertex(1).x,imageFace.getVertex(1).y)
+           && cropRect.inside(imageFace.getVertex(2).x,imageFace.getVertex(2).y)
+           ){
+            topObjectFaces.push_back(objectFaces.at(i));
+        } else {
+            bottomObjectFaces.push_back(objectFaces.at(i));
+        }
+    }
+    displayMesh.setFromTriangles(topObjectFaces);
+        theApp->bottomDisplay.displayMesh.setFromTriangles(bottomObjectFaces);
+    }
+    
+    
 	if(getb("setupMode")) {
 		// draw all reference points cyan
 		int n = referencePoints.size();
@@ -566,12 +597,18 @@ void modelDisplay::render() {
 		case 0: // faces
             if(useShader) theApp->shader.begin();
             glDisable(GL_CULL_FACE);
-            objectMesh.drawFaces();
+            if(displayMesh.getNumVertices() > 0)
+                displayMesh.drawFaces();
+            else
+                objectMesh.drawFaces();
             if(useShader) theApp->shader.end();
 			break;
 		case 1: // fullWireframe
             if(useShader) theApp->shader.begin();
-			objectMesh.drawWireframe();
+			if(displayMesh.getNumVertices() > 0)
+                displayMesh.drawFaces();
+            else
+                objectMesh.drawFaces();
             if(useShader) theApp->shader.end();
 			break;
     }

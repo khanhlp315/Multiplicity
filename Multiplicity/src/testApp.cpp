@@ -46,13 +46,13 @@ void testApp::setup() {
 	ofSetVerticalSync(true);
     ofSetWindowPosition(0, 0);
     int screenWidth = ofGetScreenWidth();
-    int screenHeight = ofGetScreenWidth()*(3/(2*4.));
+    int screenHeight = ofGetScreenWidth()*(9/(2*16.));
     ofSetWindowShape(screenWidth, screenHeight);
     
-	setupControlPanel();
+    topDisplay.setup("top", ofRectangle(ofPoint(0,0), screenWidth/2, screenHeight), "model.dae", &panel);
+    bottomDisplay.setup("bottom", ofRectangle(ofPoint(screenWidth/2,0), screenWidth/2, screenHeight), "model.dae", &panel);
 
-    topDisplay.setup("top", ofRectangle(ofPoint(0,0), screenWidth/2, ofGetHeight()), "model.dae", &panel);
-    bottomDisplay.setup("bottom", ofRectangle(ofPoint(screenWidth/2,0), screenWidth/2, ofGetHeight()), "model.dae", &panel);
+    setupControlPanel();
     
     m_shader.load( "shaders/mainScene.vert", "shaders/mainScene.frag" );
     setupLights();
@@ -65,7 +65,7 @@ void testApp::setup() {
 
 void testApp::update() {
     
-   kinect.update();
+   // kinect.update();
     
     // there is a new frame and we are connected
 	if(kinect.isFrameNew()) {
@@ -81,9 +81,9 @@ void testApp::update() {
 	}
     
 	if(getb("randomLighting")) {
-		setf("lightX", ofSignedNoise(ofGetElapsedTimef(), 1, 1) * 1000);
-		setf("lightY", ofSignedNoise(1, ofGetElapsedTimef(), 1) * 1000);
-		setf("lightZ", ofSignedNoise(1, 1, ofGetElapsedTimef()) * 1000);
+		setf("lightX", ofSignedNoise(ofGetElapsedTimef()*.5, 1, 1) * 100);
+		setf("lightY", ofSignedNoise(1, ofGetElapsedTimef()*.5, 1) * 100);
+		setf("lightZ", 100+ofSignedNoise(1, 1, ofGetElapsedTimef()*.5) * 100);
 	}
 	light.setPosition(getf("lightX"), getf("lightY"), getf("lightZ"));
     m_shadowLight.setPosition(getf("lightX"), getf("lightY"), getf("lightZ"));
@@ -264,7 +264,9 @@ void testApp::setupControlPanel() {
 	panel.addMultiToggle("setupDisplay", 0, variadic("top")("bottom"));
 	panel.addMultiToggle("drawMode", 0, variadic("faces")("fullWireframe"));
 	panel.addMultiToggle("shading", 1, variadic("none")("lights")("shadows"));
-	panel.addToggle("loadCalibration", false);
+
+    panel.addPanel("Calibration");
+    panel.addToggle("loadCalibration", false);
 	panel.addToggle("saveCalibration", false);
     
     panel.addPanel("Kinect");
@@ -358,6 +360,10 @@ void testApp::drawPointCloud() {
     
 }
 
+void testApp::windowResized(int w, int h){
+    topDisplay.updateRenderMode();
+    bottomDisplay.updateRenderMode();
+}
 
 //--------------------------------------------------------------
 void testApp::exit() {
